@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>Math Blitz — 60 Second Fact Sprint</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:        #15122a;
+    --ink-2:      #1d1938;
+    --surface:    #262046;
+    --surface-2:  #322a5c;
+    --line:       rgba(255,255,255,.10);
+    --violet:     #8b6cff;
+    --violet-dim: #6a4fd6;
+    --mint:       #34e0bd;
+    --coral:      #ff7f93;
+    --amber:      #ffbe5c;
+    --text:       #efecff;
+    --muted:      #a79fd0;
+    --radius:     18px;
+    --shadow:     0 18px 40px -18px rgba(0,0,0,.75);
+    --font:       'Fredoka', ui-rounded, 'SF Pro Rounded', 'Segoe UI', system-ui, sans-serif;
+  }
+
+  *{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+
+  html,body{ height:100%; }
+
+  body{
+    font-family:var(--font);
+    color:var(--text);
+    background:
+      radial-gradient(1000px 600px at 12% -10%, rgba(139,108,255,.30), transparent 60%),
+      radial-gradient(900px 600px at 92% 8%, rgba(52,224,189,.16), transparent 58%),
+      radial-gradient(800px 700px at 60% 115%, rgba(255,127,147,.16), transparent 60%),
+      linear-gradient(170deg, var(--ink) 0%, var(--ink-2) 100%);
+    background-attachment:fixed;
+    display:flex;
+    justify-content:center;
+    padding:24px 16px 40px;
+    min-height:100%;
+  }
+
+  .app{ width:100%; max-width:600px; }
+
+  /* ---------- header ---------- */
+  .brand{
+    display:flex; align-items:center; justify-content:space-between;
+    gap:12px; margin-bottom:20px;
+  }
+  .brand h1{
+    font-size:clamp(26px, 7vw, 38px);
+    font-weight:700; letter-spacing:.5px; line-height:1;
+    background:linear-gradient(100deg, var(--mint), var(--violet) 45%, var(--coral));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .brand .tag{ display:block; font-size:12px; font-weight:500; letter-spacing:2.4px;
+    text-transform:uppercase; color:var(--muted); margin-top:6px; }
+
+  .icon-btn{
+    flex:none; width:44px; height:44px; border-radius:14px; cursor:pointer;
+    background:rgba(255,255,255,.06); border:1px solid var(--line);
+    color:var(--text); font-family:var(--font); font-size:18px; line-height:1;
+    display:grid; place-items:center; transition:transform .12s, background .2s;
+  }
+  .icon-btn:hover{ background:rgba(255,255,255,.12); }
+  .icon-btn:active{ transform:scale(.93); }
+  .icon-btn.off{ color:var(--muted); opacity:.65; }
+
+  /* ---------- cards / screens ---------- */
+  .card{
+    background:linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.02));
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:22px;
+    backdrop-filter:blur(6px);
+  }
+  .card + .card{ margin-top:16px; }
+
+  .screen{ display:none; animation:rise .35s cubic-bezier(.2,.9,.3,1); }
+  .screen.active{ display:block; }
+  @keyframes rise{ from{ opacity:0; transform:translateY(14px);} to{ opacity:1; transform:none;} }
+
+  .eyebrow{
+    font-size:11px; letter-spacing:2.2px; text-transform:uppercase;
+    color:var(--muted); font-weight:600; margin-bottom:14px;
+  }
+
+  /* ---------- level picker ---------- */
+  .level-head{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin-bottom:4px; }
+  .level-num{ font-size:30px; font-weight:700; color:var(--amber); line-height:1; }
+  .level-name{ font-size:17px; font-weight:600; }
+  .level-desc{ color:var(--muted); font-size:14px; margin-top:2px; min-height:20px; }
+
+  input[type=range]{
+    -webkit-appearance:none; appearance:none; width:100%; background:transparent;
+    margin:20px 0 6px; cursor:pointer;
+  }
+  input[type=range]::-webkit-slider-runnable-track{
+    height:12px; border-radius:99px; border:1px solid var(--line);
+    background:linear-gradient(90deg, var(--mint), var(--violet) 55%, var(--coral));
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none; appearance:none; width:30px; height:30px; margin-top:-10px;
+    border-radius:50%; background:#fff; border:4px solid var(--surface-2);
+    box-shadow:0 4px 14px rgba(0,0,0,.5); transition:transform .12s;
+  }
+  input[type=range]:active::-webkit-slider-thumb{ transform:scale(1.12); }
+  input[type=range]::-moz-range-track{
+    height:12px; border-radius:99px; border:1px solid var(--line);
+    background:linear-gradient(90deg, var(--mint), var(--violet) 55%, var(--coral));
+  }
+  input[type=range]::-moz-range-thumb{
+    width:24px; height:24px; border-radius:50%; background:#fff;
+    border:4px solid var(--surface-2); box-shadow:0 4px 14px rgba(0,0,0,.5);
+  }
+  .ticks{ display:flex; justify-content:space-between; padding:0 4px; }
+  .ticks span{ font-size:13px; color:var(--muted); font-weight:600; width:22px; text-align:center; }
+  .ticks span.on{ color:var(--text); }
+
+  /* ---------- buttons ---------- */
+  .btn{
+    display:block; width:100%; cursor:pointer; font-family:var(--font);
+    font-size:19px; font-weight:600; letter-spacing:.4px; color:#fff;
+    padding:17px 20px; border:0; border-radius:16px;
+    background:linear-gradient(100deg, var(--violet), var(--coral));
+    box-shadow:0 12px 26px -12px var(--violet), inset 0 1px 0 rgba(255,255,255,.28);
+    transition:transform .12s, filter .2s;
+  }
+  .btn:hover{ filter:brightness(1.08); }
+  .btn:active{ transform:translateY(2px) scale(.99); }
+  .btn.ghost{
+    background:rgba(255,255,255,.06); border:1px solid var(--line);
+    box-shadow:none; color:var(--text); font-size:16px; padding:14px 18px;
+  }
+  .btn.ghost:hover{ background:rgba(255,255,255,.12); }
+  .btn:disabled{ opacity:.4; cursor:not-allowed; }
+  .btn-row{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px; }
+
+  /* ---------- high score board ---------- */
+  .scores{ display:flex; flex-direction:column; gap:6px; }
+  .score-row{
+    display:grid; grid-template-columns:auto 1fr auto auto; align-items:center; gap:12px;
+    padding:9px 12px; border-radius:12px; border:1px solid transparent;
+    font-size:15px; transition:background .2s, border-color .2s;
+  }
+  .score-row.sel{ background:rgba(139,108,255,.16); border-color:rgba(139,108,255,.45); }
+  .score-row .lv{ font-weight:700; color:var(--muted); font-size:13px; width:52px; }
+  .score-row.sel .lv{ color:var(--violet); }
+  .score-row .nm{ color:var(--muted); font-size:14px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .score-row .ini{ font-weight:700; letter-spacing:2px; color:var(--amber); font-size:15px; }
+  .score-row .pts{ font-weight:700; font-variant-numeric:tabular-nums; width:34px; text-align:right; }
+  .score-row .pts.empty{ color:rgba(167,159,208,.45); font-weight:500; }
+
+  /* ---------- game HUD ---------- */
+  .hud{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px; }
+  .stat{ text-align:center; }
+  .stat .k{ font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); font-weight:600; }
+  .stat .v{ font-size:26px; font-weight:700; font-variant-numeric:tabular-nums; line-height:1.15; }
+  .stat.time .v{ color:var(--mint); }
+  .stat.time.low .v{ color:var(--coral); animation:pulse .55s ease-in-out infinite; }
+  @keyframes pulse{ 50%{ transform:scale(1.14); } }
+  .streak{
+    font-size:12px; font-weight:600; padding:6px 12px; border-radius:99px;
+    background:rgba(255,190,92,.14); border:1px solid rgba(255,190,92,.35);
+    color:var(--amber); opacity:0; transition:opacity .2s, transform .2s; transform:scale(.85);
+  }
+  .streak.on{ opacity:1; transform:none; }
+
+  .timebar{ height:8px; border-radius:99px; background:rgba(255,255,255,.08); overflow:hidden; margin-bottom:20px; }
+  .timebar i{
+    display:block; height:100%; width:100%; border-radius:99px;
+    background:linear-gradient(90deg, var(--mint), var(--violet));
+    transform-origin:left center;
+  }
+  .timebar.low i{ background:linear-gradient(90deg, var(--amber), var(--coral)); }
+
+  /* ---------- question ---------- */
+  .qwrap{ text-align:center; padding:16px 0 6px; }
+  .question{
+    font-size:clamp(38px, 12vw, 60px); font-weight:600; letter-spacing:1px;
+    font-variant-numeric:tabular-nums; line-height:1.1;
+  }
+  .question .op{ color:var(--violet); margin:0 6px; }
+  .question .eq{ color:var(--muted); margin:0 8px; }
+  .answer{
+    display:inline-block; min-width:1.9em; padding:0 4px;
+    border-bottom:5px solid var(--violet); color:var(--amber);
+  }
+  .answer.blank{ color:rgba(255,190,92,.35); }
+  .qwrap.good .answer{ color:var(--mint); border-bottom-color:var(--mint); }
+  .qwrap.bad .answer{ color:var(--coral); border-bottom-color:var(--coral); }
+  .qwrap.bad{ animation:shake .38s; }
+  @keyframes shake{
+    0%,100%{transform:translateX(0)} 15%{transform:translateX(-11px)} 30%{transform:translateX(9px)}
+    45%{transform:translateX(-7px)} 60%{transform:translateX(5px)} 80%{transform:translateX(-3px)}
+  }
+  .qwrap.good{ animation:pop .3s; }
+  @keyframes pop{ 40%{ transform:scale(1.07); } }
+  .feedback{ height:22px; margin-top:12px; font-size:15px; font-weight:600; color:var(--muted); }
+  .feedback.good{ color:var(--mint); }
+  .feedback.bad{ color:var(--coral); }
+
+  /* ---------- keypad ---------- */
+  .pad{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:18px; }
+  .key{
+    font-family:var(--font); font-size:26px; font-weight:600; color:var(--text);
+    padding:16px 0; border-radius:14px; cursor:pointer;
+    background:linear-gradient(180deg, var(--surface-2), var(--surface));
+    border:1px solid var(--line); box-shadow:0 4px 0 rgba(0,0,0,.28);
+    transition:transform .07s, filter .15s;
+  }
+  .key:hover{ filter:brightness(1.15); }
+  .key:active{ transform:translateY(3px); box-shadow:0 1px 0 rgba(0,0,0,.28); }
+  .key.alt{ font-size:15px; letter-spacing:1.4px; color:var(--muted); }
+  .key.go{ color:#fff; background:linear-gradient(180deg, var(--violet), var(--violet-dim));
+           border-color:transparent; box-shadow:0 4px 0 rgba(0,0,0,.32); }
+
+  /* ---------- end screen ---------- */
+  .final{ text-align:center; padding:4px 0 8px; }
+  .final .big{ font-size:76px; font-weight:700; line-height:1;
+    background:linear-gradient(100deg, var(--mint), var(--amber));
+    -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .final .cap{ font-size:13px; letter-spacing:2.4px; text-transform:uppercase; color:var(--muted); font-weight:600; margin-top:8px; }
+  .final .sub{ color:var(--muted); font-size:15px; margin-top:14px; }
+  .final .sub b{ color:var(--text); }
+
+  .newhigh{
+    margin-top:18px; padding:20px; border-radius:16px; text-align:center;
+    background:linear-gradient(150deg, rgba(255,190,92,.16), rgba(255,127,147,.10));
+    border:1px solid rgba(255,190,92,.4);
+  }
+  .newhigh h3{ font-size:19px; font-weight:700; color:var(--amber); letter-spacing:1px; }
+  .newhigh p{ font-size:13px; color:var(--muted); margin-top:6px; }
+  .initials{ display:flex; justify-content:center; gap:12px; margin:18px 0 4px; }
+  .initials input{
+    width:60px; height:74px; text-align:center; font-family:var(--font);
+    font-size:38px; font-weight:700; text-transform:uppercase; color:var(--amber);
+    background:rgba(0,0,0,.32); border:2px solid rgba(255,190,92,.4);
+    border-radius:14px; outline:none; caret-color:var(--amber);
+  }
+  .initials input:focus{ border-color:var(--amber); box-shadow:0 0 0 4px rgba(255,190,92,.16); }
+
+  .hidden{ display:none !important; }
+  .note{ text-align:center; color:var(--muted); font-size:12.5px; margin-top:16px; line-height:1.6; }
+  @media (max-width:420px){ .card{ padding:18px 16px; } }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="brand">
+    <div>
+      <h1>MATH BLITZ</h1>
+      <span class="tag">60 second fact sprint</span>
+    </div>
+    <button class="icon-btn" id="muteBtn" title="Sound on/off" aria-label="Toggle sound">♪</button>
+  </div>
+
+  <!-- ================= START ================= -->
+  <section class="screen active" id="screenStart">
+    <div class="card">
+      <div class="eyebrow">Pick your level</div>
+      <div class="level-head">
+        <span class="level-num" id="lvNum">3</span>
+        <span class="level-name" id="lvName">Mixing It Up</span>
+      </div>
+      <div class="level-desc" id="lvDesc"></div>
+      <input type="range" id="levelSlider" min="1" max="6" step="1" value="3" aria-label="Difficulty level">
+      <div class="ticks" id="ticks"></div>
+    </div>
+
+    <div class="card">
+      <div class="eyebrow">High scores</div>
+      <div class="scores" id="scoreBoard"></div>
+    </div>
+
+    <div class="card">
+      <button class="btn" id="startBtn">START THE CLOCK</button>
+      <p class="note">Type your answer with the keypad or your keyboard.<br>Correct answers jump ahead automatically.</p>
+    </div>
+  </section>
+
+  <!-- ================= GAME ================= -->
+  <section class="screen" id="screenGame">
+    <div class="card">
+      <div class="hud">
+        <div class="stat"><div class="k">Score</div><div class="v" id="hudScore">0</div></div>
+        <div class="streak" id="hudStreak">STREAK 0</div>
+        <div class="stat time" id="hudTimeWrap"><div class="k">Time</div><div class="v" id="hudTime">60</div></div>
+      </div>
+      <div class="timebar" id="timebar"><i id="timebarFill"></i></div>
+
+      <div class="qwrap" id="qwrap">
+        <div class="question" aria-live="polite">
+          <span id="qa">7</span><span class="op" id="qop">×</span><span id="qb">8</span>
+          <span class="eq">=</span><span class="answer blank" id="qans">?</span>
+        </div>
+      </div>
+      <div class="feedback" id="feedback" aria-live="polite"></div>
+
+      <div class="pad" id="pad">
+        <button class="key" data-k="1">1</button>
+        <button class="key" data-k="2">2</button>
+        <button class="key" data-k="3">3</button>
+        <button class="key" data-k="4">4</button>
+        <button class="key" data-k="5">5</button>
+        <button class="key" data-k="6">6</button>
+        <button class="key" data-k="7">7</button>
+        <button class="key" data-k="8">8</button>
+        <button class="key" data-k="9">9</button>
+        <button class="key alt" data-k="del">DEL</button>
+        <button class="key" data-k="0">0</button>
+        <button class="key go" data-k="enter">OK</button>
+      </div>
+    </div>
+    <button class="btn ghost" id="quitBtn" style="margin-top:14px;">End round</button>
+  </section>
+
+  <!-- ================= END ================= -->
+  <section class="screen" id="screenEnd">
+    <div class="card">
+      <div class="final">
+        <div class="cap" id="endLevelCap">Level 3</div>
+        <div class="big" id="endScore">0</div>
+        <div class="cap">Facts solved</div>
+        <div class="sub" id="endStats"></div>
+      </div>
+
+      <div class="newhigh hidden" id="newHigh">
+        <h3>NEW HIGH SCORE!</h3>
+        <p>Enter your initials for the leaderboard</p>
+        <div class="initials">
+          <input maxlength="1" id="i0" autocomplete="off" aria-label="First initial">
+          <input maxlength="1" id="i1" autocomplete="off" aria-label="Second initial">
+          <input maxlength="1" id="i2" autocomplete="off" aria-label="Third initial">
+        </div>
+        <button class="btn" id="saveBtn" style="margin-top:14px;" disabled>SAVE SCORE</button>
+      </div>
+
+      <div class="btn-row" id="endActions">
+        <button class="btn ghost" id="againBtn">Play again</button>
+        <button class="btn ghost" id="menuBtn">Change level</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="eyebrow">High scores</div>
+      <div class="scores" id="scoreBoard2"></div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+/* ============================================================
+   LEVEL DESIGN
+   w  = operation mix. Low levels lean on + and −, high levels
+        lean on × and ÷.
+   as = [min,max] operand range for addition and subtraction.
+   md = [min,max] operand range for multiplication and division.
+   The two ranges are separate so + and − can use big numbers
+   early while × and ÷ still enter gently with small factors.
+   ============================================================ */
+const LEVELS = {
+  1:{ name:'Warm-Up',      desc:'Adding and subtracting up to 9',           as:[0, 9],  md:[0, 5],  w:{add:50, sub:50, mul:0,  div:0}  },
+  2:{ name:'Getting Going',desc:'Sums to 10, plus the first times tables',  as:[0,10],  md:[0, 5],  w:{add:40, sub:32, mul:18, div:10} },
+  3:{ name:'Mixing It Up', desc:'All four operations with numbers to 12',   as:[0,12],  md:[0, 7],  w:{add:30, sub:25, mul:27, div:18} },
+  4:{ name:'Fact Power',   desc:'Bigger numbers, mostly multiplying',       as:[2,12],  md:[1, 9],  w:{add:20, sub:20, mul:36, div:24} },
+  5:{ name:'Speed Demon',  desc:'Times tables and division up to 11',       as:[3,12],  md:[2,11],  w:{add:14, sub:13, mul:43, div:30} },
+  6:{ name:'Blitz Master', desc:'The full 12 × 12 gauntlet',                as:[4,12],  md:[2,12],  w:{add:8,  sub:7,  mul:50, div:35} }
+};
+const ROUND_SECONDS = 60;
+const STORE_KEY = 'mathBlitzHighScores.v1';
+const MUTE_KEY  = 'mathBlitzMuted.v1';
+
+/* ============================================================
+   AUDIO — everything is synthesized with the Web Audio API so
+   the game stays a single file with no asset downloads.
+   ============================================================ */
+const Audio2 = (() => {
+  let ctx = null, master = null, musicBus = null, sfxBus = null, noiseBuf = null;
+  let timer = null, step = 0, nextTime = 0, playing = false;
+
+  const BPM = 132;
+  const EIGHTH = 30 / BPM;             // seconds per eighth note
+  const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
+
+  // I – V – vi – IV in C. Bass root, then chord tones for the arpeggio.
+  const BARS = [
+    { bass:36, arp:[60,64,67,72] },    // C
+    { bass:43, arp:[59,62,67,71] },    // G
+    { bass:45, arp:[57,60,64,69] },    // Am
+    { bass:41, arp:[57,60,65,69] }     // F
+  ];
+  const ARP_PATTERN = [0,1,2,3,2,3,1,2];
+  const LEAD = [ null,null,null,null, 76,74,72,74,  null,null,null,null, 71,72,74,76 ];
+
+  function init(){
+    if (ctx) return;
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    ctx = new AC();
+    master   = ctx.createGain(); master.gain.value = 1;   master.connect(ctx.destination);
+    musicBus = ctx.createGain(); musicBus.gain.value = 0; musicBus.connect(master);
+    sfxBus   = ctx.createGain(); sfxBus.gain.value = 0.55; sfxBus.connect(master);
+
+    const len = Math.floor(ctx.sampleRate * 0.5);
+    noiseBuf = ctx.createBuffer(1, len, ctx.sampleRate);
+    const d = noiseBuf.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+  }
+
+  function resume(){ init(); if (ctx && ctx.state === 'suspended') ctx.resume(); }
+  function setMuted(m){ init(); if (master) master.gain.setTargetAtTime(m ? 0 : 1, ctx.currentTime, 0.02); }
+
+  function tone(t, freq, dur, type, peak, dest, detune){
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = type; o.frequency.value = freq;
+    if (detune) o.detune.value = detune;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(peak, t + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(dest || sfxBus);
+    o.start(t); o.stop(t + dur + 0.05);
+  }
+
+  function noise(t, dur, peak, hpFreq, dest){
+    const s = ctx.createBufferSource(); s.buffer = noiseBuf;
+    const f = ctx.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = hpFreq;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(peak, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    s.connect(f); f.connect(g); g.connect(dest || sfxBus);
+    s.start(t); s.stop(t + dur + 0.02);
+  }
+
+  function kick(t, dest){
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(150, t);
+    o.frequency.exponentialRampToValueAtTime(46, t + 0.11);
+    g.gain.setValueAtTime(0.9, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.24);
+    o.connect(g); g.connect(dest);
+    o.start(t); o.stop(t + 0.28);
+  }
+
+  /* ---- one eighth-note of the backing track ---- */
+  function scheduleStep(i, t){
+    const bar = BARS[Math.floor(i / 8) % 4];
+    const s   = i % 8;
+
+    if (s === 0 || s === 4 || s === 7) kick(t, musicBus);
+    if (s === 2 || s === 6) noise(t, 0.16, 0.30, 1400, musicBus);            // snare
+    noise(t, 0.045, s % 2 === 0 ? 0.11 : 0.06, 7000, musicBus);              // hats
+
+    if (s === 0 || s === 3 || s === 6){
+      const n = s === 6 ? bar.bass + 7 : bar.bass;
+      tone(t, mtof(n), 0.30, 'triangle', 0.42, musicBus);
+      tone(t, mtof(n), 0.30, 'sawtooth', 0.10, musicBus);
+    }
+
+    const arpNote = bar.arp[ARP_PATTERN[s]];
+    tone(t, mtof(arpNote), 0.20, 'triangle', 0.16, musicBus);
+
+    const lead = LEAD[i % 16];
+    if (lead && i >= 16) tone(t, mtof(lead), 0.34, 'square', 0.055, musicBus);
+  }
+
+  function tick(){
+    while (nextTime < ctx.currentTime + 0.14){
+      scheduleStep(step % 32, nextTime);
+      step++; nextTime += EIGHTH;
+    }
+  }
+
+  function startMusic(){
+    resume(); if (!ctx || playing) return;
+    playing = true; step = 0; nextTime = ctx.currentTime + 0.08;
+    musicBus.gain.cancelScheduledValues(ctx.currentTime);
+    musicBus.gain.setValueAtTime(0.0001, ctx.currentTime);
+    musicBus.gain.linearRampToValueAtTime(0.22, ctx.currentTime + 0.8);
+    tick();
+    timer = setInterval(tick, 25);
+  }
+
+  function stopMusic(){
+    if (!ctx || !playing) return;
+    playing = false; clearInterval(timer); timer = null;
+    musicBus.gain.cancelScheduledValues(ctx.currentTime);
+    musicBus.gain.setValueAtTime(musicBus.gain.value, ctx.currentTime);
+    musicBus.gain.linearRampToValueAtTime(0.0001, ctx.currentTime + 0.35);
+  }
+
+  /* ---- sound effects ---- */
+  function ding(streak){
+    resume(); if (!ctx) return;
+    const t = ctx.currentTime;
+    const lift = Math.min(streak || 0, 8) * 0.6;               // climbs as the streak grows
+    tone(t,        mtof(84 + lift), 0.14, 'sine', 0.34);
+    tone(t + 0.075, mtof(88 + lift), 0.26, 'sine', 0.30);
+    tone(t + 0.075, mtof(91 + lift), 0.26, 'triangle', 0.10);
+  }
+
+  function buzz(){
+    resume(); if (!ctx) return;
+    const t = ctx.currentTime;
+    tone(t, 150, 0.20, 'sawtooth', 0.26);
+    tone(t, 98,  0.22, 'square',   0.20);
+    tone(t + 0.16, 128, 0.22, 'sawtooth', 0.24);
+    tone(t + 0.16, 84,  0.24, 'square',   0.18);
+  }
+
+  function fanfare(win){
+    resume(); if (!ctx) return;
+    const t = ctx.currentTime;
+    const notes = win ? [72,76,79,84,88] : [72,69,65,60];
+    notes.forEach((n, i) => {
+      tone(t + i * 0.12, mtof(n), win ? 0.45 : 0.34, 'triangle', 0.26);
+      tone(t + i * 0.12, mtof(n + 12), 0.22, 'sine', 0.10);
+    });
+  }
+
+  return { resume, setMuted, startMusic, stopMusic, ding, buzz, fanfare };
+})();
+
+/* ============================================================
+   HIGH SCORES
+   ============================================================ */
+function loadScores(){
+  try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; }
+  catch { return {}; }
+}
+function saveScores(s){
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(s)); } catch {}
+}
+let highScores = loadScores();
+
+/* ============================================================
+   QUESTIONS
+   ============================================================ */
+const randInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+function pickOp(weights){
+  const total = Object.values(weights).reduce((a, b) => a + b, 0);
+  let r = Math.random() * total;
+  for (const [op, w] of Object.entries(weights)){
+    r -= w;
+    if (r < 0) return op;
+  }
+  return 'add';
+}
+
+function buildQuestion(level){
+  const cfg = LEVELS[level];
+  const op = pickOp(cfg.w);
+  const [lo, hi] = (op === 'add' || op === 'sub') ? cfg.as : cfg.md;
+  let a, b, answer, symbol;
+
+  if (op === 'add'){
+    a = randInt(lo, hi); b = randInt(lo, hi);
+    answer = a + b; symbol = '+';
+  } else if (op === 'sub'){
+    const x = randInt(lo, hi), y = randInt(lo, hi);
+    a = Math.max(x, y); b = Math.min(x, y);
+    answer = a - b; symbol = '−';
+  } else if (op === 'mul'){
+    a = randInt(lo, hi); b = randInt(lo, hi);
+    answer = a * b; symbol = '×';
+  } else {
+    const divisor  = randInt(Math.max(lo, 1), hi);
+    const quotient = randInt(Math.max(lo, 1), hi);
+    a = divisor * quotient; b = divisor;
+    answer = quotient; symbol = '÷';
+  }
+
+  // + and × are commutative, so 3+7 and 7+3 share one key and only
+  // one of the two orders can appear in a sprint. − and ÷ are already
+  // normalized by construction.
+  const key = (op === 'add' || op === 'mul')
+    ? Math.min(a, b) + symbol + Math.max(a, b)
+    : a + symbol + b;
+
+  return { a, b, answer, symbol, key };
+}
+
+// `seen` holds every question already shown this sprint.
+function nextQuestion(level, seen){
+  let q;
+  for (let i = 0; i < 60; i++){
+    q = buildQuestion(level);
+    if (!seen.has(q.key)) return q;
+  }
+  // The level's pool is spent — begin a fresh pass rather than stall.
+  seen.clear();
+  return q;
+}
+
+/* ============================================================
+   GAME STATE + UI
+   ============================================================ */
+const $ = id => document.getElementById(id);
+
+const state = {
+  level: 3, running: false, muted: localStorage.getItem(MUTE_KEY) === '1',
+  score: 0, misses: 0, streak: 0, bestStreak: 0,
+  typed: '', q: null, seen: new Set(), endsAt: 0, raf: null, pendingHigh: false
+};
+
+/* ---- level picker ---- */
+function renderTicks(){
+  $('ticks').innerHTML = [1,2,3,4,5,6]
+    .map(n => `<span class="${n === state.level ? 'on' : ''}">${n}</span>`).join('');
+}
+function renderLevel(){
+  const cfg = LEVELS[state.level];
+  $('lvNum').textContent  = state.level;
+  $('lvName').textContent = cfg.name;
+  $('lvDesc').textContent = cfg.desc;
+  renderTicks();
+  renderBoards();
+}
+
+/* ---- high score board ---- */
+function boardHTML(){
+  return [1,2,3,4,5,6].map(n => {
+    const rec = highScores[n];
+    const sel = n === state.level ? ' sel' : '';
+    return `<div class="score-row${sel}">
+      <span class="lv">LV ${n}</span>
+      <span class="nm">${LEVELS[n].name}</span>
+      <span class="ini">${rec ? rec.initials : ''}</span>
+      <span class="pts${rec ? '' : ' empty'}">${rec ? rec.score : '—'}</span>
+    </div>`;
+  }).join('');
+}
+function renderBoards(){
+  $('scoreBoard').innerHTML  = boardHTML();
+  $('scoreBoard2').innerHTML = boardHTML();
+}
+
+/* ---- screens ---- */
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  $(id).classList.add('active');
+}
+
+/* ---- question rendering ---- */
+function paintQuestion(){
+  $('qa').textContent  = state.q.a;
+  $('qop').textContent = state.q.symbol;
+  $('qb').textContent  = state.q.b;
+  const ans = $('qans');
+  ans.textContent = state.typed === '' ? '?' : state.typed;
+  ans.classList.toggle('blank', state.typed === '');
+}
+
+function setFeedback(text, cls){
+  const f = $('feedback');
+  f.textContent = text;
+  f.className = 'feedback' + (cls ? ' ' + cls : '');
+}
+
+function updateHUD(){
+  $('hudScore').textContent = state.score;
+  const st = $('hudStreak');
+  st.textContent = 'STREAK ' + state.streak;
+  st.classList.toggle('on', state.streak >= 3);
+}
+
+/* ---- round flow ---- */
+function serveQuestion(){
+  state.q = nextQuestion(state.level, state.seen);
+  state.seen.add(state.q.key);
+  state.typed = '';
+  paintQuestion();
+}
+
+function startGame(){
+  state.running = true;
+  state.score = 0; state.misses = 0; state.streak = 0; state.bestStreak = 0;
+  state.seen.clear();
+  updateHUD();
+  setFeedback('');
+  $('qwrap').className = 'qwrap';
+  $('hudTimeWrap').classList.remove('low');
+  $('timebar').classList.remove('low');
+  serveQuestion();
+  showScreen('screenGame');
+
+  Audio2.resume();
+  Audio2.setMuted(state.muted);
+  Audio2.startMusic();
+
+  state.endsAt = performance.now() + ROUND_SECONDS * 1000;
+  tickClock();
+}
+
+function tickClock(){
+  const left = Math.max(0, state.endsAt - performance.now());
+  const secs = Math.ceil(left / 1000);
+  $('hudTime').textContent = secs;
+  $('timebarFill').style.transform = 'scaleX(' + (left / (ROUND_SECONDS * 1000)) + ')';
+  const low = secs <= 10;
+  $('hudTimeWrap').classList.toggle('low', low);
+  $('timebar').classList.toggle('low', low);
+
+  if (left <= 0){ endGame(); return; }
+  state.raf = requestAnimationFrame(tickClock);
+}
+
+function endGame(){
+  if (!state.running) return;
+  state.running = false;
+  cancelAnimationFrame(state.raf);
+  Audio2.stopMusic();
+
+  const rec  = highScores[state.level];
+  const isHigh = state.score > 0 && (!rec || state.score > rec.score);
+  state.pendingHigh = isHigh;
+
+  $('endLevelCap').textContent = 'Level ' + state.level + ' · ' + LEVELS[state.level].name;
+  $('endScore').textContent = state.score;
+  const attempts = state.score + state.misses;
+  const acc = attempts ? Math.round((state.score / attempts) * 100) : 100;
+  const best = rec ? rec.score : 0;
+  $('endStats').innerHTML =
+    `<b>${acc}%</b> accuracy · best streak <b>${state.bestStreak}</b><br>` +
+    (isHigh ? `Previous best: <b>${best || '—'}</b>` : `Level best: <b>${best || '—'}</b>`);
+
+  $('newHigh').classList.toggle('hidden', !isHigh);
+  $('endActions').classList.toggle('hidden', isHigh);
+  if (isHigh){
+    ['i0','i1','i2'].forEach(id => $(id).value = '');
+    $('saveBtn').disabled = true;
+    setTimeout(() => $('i0').focus(), 350);
+  }
+
+  renderBoards();
+  showScreen('screenEnd');
+  setTimeout(() => Audio2.fanfare(isHigh), 200);
+}
+
+/* ---- answering ---- */
+function correct(){
+  state.score++;
+  state.streak++;
+  state.bestStreak = Math.max(state.bestStreak, state.streak);
+  updateHUD();
+  Audio2.ding(state.streak);
+
+  const w = $('qwrap');
+  w.className = 'qwrap good';
+  paintQuestion();
+  const praise = ['Nice!', 'Yes!', 'Got it!', 'Sharp!', 'Boom!', 'Correct!'];
+  setFeedback(state.streak >= 5 ? `${state.streak} in a row!` : praise[randInt(0, praise.length - 1)], 'good');
+
+  setTimeout(() => {
+    if (!state.running) return;
+    w.className = 'qwrap';
+    setFeedback('');
+    serveQuestion();
+  }, 260);
+}
+
+function wrong(){
+  state.misses++;
+  state.streak = 0;
+  updateHUD();
+  Audio2.buzz();
+
+  const w = $('qwrap');
+  w.className = 'qwrap bad';
+  setFeedback('Not quite — try again!', 'bad');
+  setTimeout(() => {
+    if (!state.running) return;
+    w.className = 'qwrap';
+    state.typed = '';
+    paintQuestion();
+  }, 380);
+}
+
+function pressKey(k){
+  if (!state.running) return;
+  const w = $('qwrap');
+  if (w.classList.contains('good') || w.classList.contains('bad')) return;
+
+  if (k === 'del'){
+    state.typed = state.typed.slice(0, -1);
+    paintQuestion();
+    return;
+  }
+  if (k === 'enter'){
+    if (state.typed === '') return;
+    if (Number(state.typed) === state.q.answer) correct(); else wrong();
+    return;
+  }
+
+  if (state.typed.length >= 3) return;
+  state.typed += k;
+  paintQuestion();
+
+  const target = String(state.q.answer);
+  if (state.typed === target) correct();
+  else if (state.typed.length >= target.length) wrong();   // can no longer be right
+}
+
+/* ============================================================
+   EVENTS
+   ============================================================ */
+$('levelSlider').addEventListener('input', e => {
+  state.level = Number(e.target.value);
+  renderLevel();
+});
+
+$('ticks').addEventListener('click', e => {
+  const spans = [...$('ticks').children];
+  const i = spans.indexOf(e.target);
+  if (i < 0) return;
+  state.level = i + 1;
+  $('levelSlider').value = state.level;
+  renderLevel();
+});
+
+$('startBtn').addEventListener('click', startGame);
+$('quitBtn').addEventListener('click', endGame);
+$('againBtn').addEventListener('click', startGame);
+$('menuBtn').addEventListener('click', () => { renderLevel(); showScreen('screenStart'); });
+
+$('pad').addEventListener('click', e => {
+  const btn = e.target.closest('.key');
+  if (btn) pressKey(btn.dataset.k);
+});
+
+$('muteBtn').addEventListener('click', () => {
+  state.muted = !state.muted;
+  localStorage.setItem(MUTE_KEY, state.muted ? '1' : '0');
+  syncMuteBtn();
+  Audio2.setMuted(state.muted);
+});
+function syncMuteBtn(){
+  const b = $('muteBtn');
+  b.textContent = state.muted ? '✕' : '♪';
+  b.classList.toggle('off', state.muted);
+}
+
+document.addEventListener('keydown', e => {
+  if ($('screenEnd').classList.contains('active') && !$('newHigh').classList.contains('hidden')) return;
+  if (!state.running){
+    if (e.key === 'Enter' && $('screenStart').classList.contains('active')){ startGame(); e.preventDefault(); }
+    return;
+  }
+  if (e.key >= '0' && e.key <= '9'){ pressKey(e.key); e.preventDefault(); }
+  else if (e.key === 'Backspace'){ pressKey('del'); e.preventDefault(); }
+  else if (e.key === 'Enter'){ pressKey('enter'); e.preventDefault(); }
+  else if (e.key === 'Escape'){ endGame(); }
+});
+
+/* ---- arcade initials entry ---- */
+const inits = ['i0','i1','i2'].map(id => $(id));
+inits.forEach((box, i) => {
+  box.addEventListener('input', () => {
+    box.value = box.value.replace(/[^a-zA-Z]/g, '').toUpperCase();
+    if (box.value && i < 2) inits[i + 1].focus();
+    $('saveBtn').disabled = inits.some(b => !b.value);
+  });
+  box.addEventListener('keydown', e => {
+    if (e.key === 'Backspace' && !box.value && i > 0){ inits[i - 1].focus(); e.preventDefault(); }
+    if (e.key === 'Enter' && !$('saveBtn').disabled) saveHighScore();
+  });
+});
+
+function saveHighScore(){
+  const initials = inits.map(b => b.value || '-').join('').toUpperCase();
+  highScores[state.level] = { score: state.score, initials };
+  saveScores(highScores);
+  state.pendingHigh = false;
+  $('newHigh').classList.add('hidden');
+  $('endActions').classList.remove('hidden');
+  renderBoards();
+  Audio2.fanfare(true);
+}
+$('saveBtn').addEventListener('click', saveHighScore);
+
+/* ---- boot ---- */
+renderLevel();
+syncMuteBtn();
+</script>
+</body>
+</html>

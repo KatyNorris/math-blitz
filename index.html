@@ -192,6 +192,13 @@
   .stat.time .v{ color:var(--mint); }
   .stat.time.low .v{ color:var(--coral); animation:pulse .55s ease-in-out infinite; }
   @keyframes pulse{ 50%{ transform:scale(1.14); } }
+  .hud-mid{ display:flex; flex-direction:column; align-items:center; gap:6px; }
+  .lvl-chip{
+    font-size:12px; font-weight:600; letter-spacing:1.4px; white-space:nowrap;
+    padding:6px 12px; border-radius:99px;
+    background:rgba(139,108,255,.16); border:1px solid rgba(139,108,255,.42);
+    color:#b6a1ff;
+  }
   .streak{
     font-size:12px; font-weight:600; padding:6px 12px; border-radius:99px;
     background:rgba(255,190,92,.14); border:1px solid rgba(255,190,92,.35);
@@ -319,7 +326,10 @@
     <div class="card">
       <div class="hud">
         <div class="stat"><div class="k">Score</div><div class="v" id="hudScore">0</div></div>
-        <div class="streak" id="hudStreak">STREAK 0</div>
+        <div class="hud-mid">
+          <span class="lvl-chip" id="hudLevel">LVL 3</span>
+          <div class="streak" id="hudStreak">STREAK 0</div>
+        </div>
         <div class="stat time" id="hudTimeWrap"><div class="k">Time</div><div class="v" id="hudTime">60</div></div>
       </div>
       <div class="timebar" id="timebar"><i id="timebarFill"></i></div>
@@ -726,6 +736,7 @@ function startGame(){
   // leaderboard on the results screen, and that must not retarget the
   // score they just earned.
   state.roundLevel = state.level;
+  $('hudLevel').textContent = 'LVL ' + state.roundLevel;
   state.score = 0; state.misses = 0; state.streak = 0; state.bestStreak = 0;
   state.seen.clear();
   updateHUD();

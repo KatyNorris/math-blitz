@@ -2,8 +2,19 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
 <title>Math Blitz — 60 Second Fact Sprint</title>
+<meta name="description" content="A 60-second math facts sprint for 3rd to 6th graders.">
+
+<!-- Add to Home Screen: launches full screen with no browser chrome -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Math Blitz">
+<meta name="application-name" content="Math Blitz">
+<meta name="theme-color" content="#15122a">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='15' fill='%2315122a'/%3E%3Ctext x='32' y='45' text-anchor='middle' font-size='38' font-family='system-ui,sans-serif' fill='%238b6cff'%3E%C3%97%3C/text%3E%3C/svg%3E">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -28,11 +39,16 @@
 
   *{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
 
-  html,body{ height:100%; }
+  html,body{ height:100%; overscroll-behavior:none; }
 
   body{
     font-family:var(--font);
     color:var(--text);
+    /* No accidental text selection or double-tap zoom when it runs
+       full screen from the home screen. */
+    -webkit-user-select:none; user-select:none;
+    -webkit-touch-callout:none;
+    touch-action:manipulation;
     background:
       radial-gradient(1000px 600px at 12% -10%, rgba(139,108,255,.30), transparent 60%),
       radial-gradient(900px 600px at 92% 8%, rgba(52,224,189,.16), transparent 58%),
@@ -41,9 +57,11 @@
     background-attachment:fixed;
     display:flex;
     justify-content:center;
-    padding:24px 16px 40px;
+    padding:calc(24px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) calc(40px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left));
     min-height:100%;
   }
+
+  input{ -webkit-user-select:text; user-select:text; }
 
   .app{ width:100%; max-width:600px; }
 
@@ -66,6 +84,7 @@
     background:rgba(255,255,255,.06); border:1px solid var(--line);
     color:var(--text); font-family:var(--font); font-size:18px; line-height:1;
     display:grid; place-items:center; transition:transform .12s, background .2s;
+    touch-action:manipulation;
   }
   .icon-btn:hover{ background:rgba(255,255,255,.12); }
   .icon-btn:active{ transform:scale(.93); }
@@ -131,6 +150,7 @@
     background:linear-gradient(100deg, var(--violet), var(--coral));
     box-shadow:0 12px 26px -12px var(--violet), inset 0 1px 0 rgba(255,255,255,.28);
     transition:transform .12s, filter .2s;
+    touch-action:manipulation;
   }
   .btn:hover{ filter:brightness(1.08); }
   .btn:active{ transform:translateY(2px) scale(.99); }
@@ -214,6 +234,7 @@
     background:linear-gradient(180deg, var(--surface-2), var(--surface));
     border:1px solid var(--line); box-shadow:0 4px 0 rgba(0,0,0,.28);
     transition:transform .07s, filter .15s;
+    touch-action:manipulation;
   }
   .key:hover{ filter:brightness(1.15); }
   .key:active{ transform:translateY(3px); box-shadow:0 1px 0 rgba(0,0,0,.28); }

@@ -169,8 +169,14 @@
     display:grid; grid-template-columns:auto 1fr auto auto; align-items:center; gap:12px;
     padding:9px 12px; border-radius:12px; border:1px solid transparent;
     font-size:15px; transition:background .2s, border-color .2s;
+    width:100%; text-align:left; cursor:pointer;
+    font-family:inherit; color:var(--text);
+    background:transparent; -webkit-appearance:none; appearance:none;
   }
+  .score-row:hover{ background:rgba(255,255,255,.07); }
+  .score-row:focus-visible{ outline:2px solid var(--violet); outline-offset:2px; }
   .score-row.sel{ background:rgba(139,108,255,.16); border-color:rgba(139,108,255,.45); }
+  .score-row.sel:hover{ background:rgba(139,108,255,.23); }
   .score-row .lv{ font-weight:700; color:var(--muted); font-size:13px; width:52px; }
   .score-row.sel .lv{ color:var(--violet); }
   .score-row .nm{ color:var(--muted); font-size:14px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
@@ -390,7 +396,7 @@
    early while × and ÷ still enter gently with small factors.
    ============================================================ */
 const LEVELS = {
-  1:{ name:'Warm-Up',      desc:'Adding and subtracting up to 9',           as:[0, 9],  md:[0, 5],  w:{add:50, sub:50, mul:0,  div:0}  },
+  1:{ name:'Warm-Up',      desc:'Adding and subtracting up to 5',           as:[0, 5],  md:[0, 5],  w:{add:50, sub:50, mul:0,  div:0}  },
   2:{ name:'Getting Going',desc:'Sums to 10, plus the first times tables',  as:[0,10],  md:[0, 5],  w:{add:40, sub:32, mul:18, div:10} },
   3:{ name:'Mixing It Up', desc:'All four operations with numbers to 12',   as:[0,12],  md:[0, 7],  w:{add:30, sub:25, mul:27, div:18} },
   4:{ name:'Fact Power',   desc:'Bigger numbers, mostly multiplying',       as:[2,12],  md:[1, 9],  w:{add:20, sub:20, mul:36, div:24} },
@@ -612,15 +618,22 @@ function buildQuestion(level){
   return { a, b, answer, symbol, key };
 }
 
-// `seen` holds every question already shown this sprint.
-function nextQuestion(level, seen){
+// `seen` holds every question already shown this sprint. Level 1 has only
+// 42 distinct problems, so a fast player can genuinely use them all up.
+function nextQuestion(level, seen, lastKey){
   let q;
   for (let i = 0; i < 60; i++){
     q = buildQuestion(level);
     if (!seen.has(q.key)) return q;
   }
-  // The level's pool is spent — begin a fresh pass rather than stall.
+  // The level's pool is spent. Begin a fresh pass rather than stall, but
+  // never hand back the question still on screen.
   seen.clear();
+  if (lastKey) seen.add(lastKey);
+  for (let i = 0; i < 20; i++){
+    q = buildQuestion(level);
+    if (!seen.has(q.key)) return q;
+  }
   return q;
 }
 
@@ -631,7 +644,7 @@ const $ = id => document.getElementById(id);
 
 const state = {
   level: 3, running: false, muted: localStorage.getItem(MUTE_KEY) === '1',
-  score: 0, misses: 0, streak: 0, bestStreak: 0,
+  score: 0, misses: 0, streak: 0, bestStreak: 0, roundLevel: 3,
   typed: '', q: null, seen: new Set(), endsAt: 0, raf: null, pendingHigh: false
 };
 
@@ -653,13 +666,16 @@ function renderLevel(){
 function boardHTML(){
   return [1,2,3,4,5,6].map(n => {
     const rec = highScores[n];
-    const sel = n === state.level ? ' sel' : '';
-    return `<div class="score-row${sel}">
+    const on  = n === state.level;
+    const best = rec ? `best ${rec.score} by ${rec.initials}` : 'no score yet';
+    return `<button type="button" class="score-row${on ? ' sel' : ''}" data-level="${n}"
+      aria-pressed="${on}" title="Switch to level ${n}"
+      aria-label="Level ${n}, ${LEVELS[n].name}, ${best}">
       <span class="lv">LV ${n}</span>
       <span class="nm">${LEVELS[n].name}</span>
       <span class="ini">${rec ? rec.initials : ''}</span>
       <span class="pts${rec ? '' : ' empty'}">${rec ? rec.score : '—'}</span>
-    </div>`;
+    </button>`;
   }).join('');
 }
 function renderBoards(){
@@ -698,7 +714,7 @@ function updateHUD(){
 
 /* ---- round flow ---- */
 function serveQuestion(){
-  state.q = nextQuestion(state.level, state.seen);
+  state.q = nextQuestion(state.roundLevel, state.seen, state.q ? state.q.key : '');
   state.seen.add(state.q.key);
   state.typed = '';
   paintQuestion();
@@ -706,6 +722,10 @@ function serveQuestion(){
 
 function startGame(){
   state.running = true;
+  // Pin the round to this level. The player can switch levels from the
+  // leaderboard on the results screen, and that must not retarget the
+  // score they just earned.
+  state.roundLevel = state.level;
   state.score = 0; state.misses = 0; state.streak = 0; state.bestStreak = 0;
   state.seen.clear();
   updateHUD();
@@ -743,11 +763,12 @@ function endGame(){
   cancelAnimationFrame(state.raf);
   Audio2.stopMusic();
 
-  const rec  = highScores[state.level];
+  const lv   = state.roundLevel;
+  const rec  = highScores[lv];
   const isHigh = state.score > 0 && (!rec || state.score > rec.score);
   state.pendingHigh = isHigh;
 
-  $('endLevelCap').textContent = 'Level ' + state.level + ' · ' + LEVELS[state.level].name;
+  $('endLevelCap').textContent = 'Level ' + lv + ' · ' + LEVELS[lv].name;
   $('endScore').textContent = state.score;
   const attempts = state.score + state.misses;
   const acc = attempts ? Math.round((state.score / attempts) * 100) : 100;
@@ -836,18 +857,33 @@ function pressKey(k){
 /* ============================================================
    EVENTS
    ============================================================ */
-$('levelSlider').addEventListener('input', e => {
-  state.level = Number(e.target.value);
+// Slider, tick numbers and leaderboard rows all funnel through here so
+// the three stay in sync whichever one the player uses.
+function selectLevel(n){
+  if (!LEVELS[n] || n === state.level) return;
+  state.level = n;
+  $('levelSlider').value = n;
   renderLevel();
-});
+}
+
+$('levelSlider').addEventListener('input', e => selectLevel(Number(e.target.value)));
 
 $('ticks').addEventListener('click', e => {
-  const spans = [...$('ticks').children];
-  const i = spans.indexOf(e.target);
-  if (i < 0) return;
-  state.level = i + 1;
-  $('levelSlider').value = state.level;
-  renderLevel();
+  const i = [...$('ticks').children].indexOf(e.target);
+  if (i >= 0) selectLevel(i + 1);
+});
+
+[$('scoreBoard'), $('scoreBoard2')].forEach(board => {
+  board.addEventListener('click', e => {
+    const row = e.target.closest('.score-row');
+    if (!row) return;
+    const n = Number(row.dataset.level);
+    selectLevel(n);
+    // Selecting re-renders the board, so hand focus to the row that
+    // replaced the one just clicked; otherwise keyboard users lose it.
+    const replacement = board.querySelector(`.score-row[data-level="${n}"]`);
+    if (replacement) replacement.focus();
+  });
 });
 
 $('startBtn').addEventListener('click', startGame);
@@ -911,7 +947,7 @@ inits.forEach((box, i) => {
 
 function saveHighScore(){
   const initials = inits.map(b => b.value || '-').join('').toUpperCase();
-  highScores[state.level] = { score: state.score, initials };
+  highScores[state.roundLevel] = { score: state.score, initials };
   saveScores(highScores);
   state.pendingHigh = false;
   $('newHigh').classList.add('hidden');

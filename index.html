@@ -281,7 +281,7 @@
       <h1>MATH BLITZ</h1>
       <span class="tag">60 second fact sprint</span>
     </div>
-    <button class="icon-btn" id="muteBtn" title="Sound on/off" aria-label="Toggle sound">♪</button>
+    <button class="icon-btn" id="muteBtn" title="Turn sound off" aria-label="Turn sound off"></button>
   </div>
 
   <!-- ================= START ================= -->
@@ -866,10 +866,21 @@ $('muteBtn').addEventListener('click', () => {
   syncMuteBtn();
   Audio2.setMuted(state.muted);
 });
+const NOTE_SVG = `<svg viewBox="0 0 24 24" width="21" height="21" fill="none"
+  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M9 17V4l11-2v13"/>
+  <circle cx="6" cy="17" r="3" fill="currentColor"/><circle cx="17" cy="15" r="3" fill="currentColor"/>%SLASH%</svg>`;
+const ICON_SOUND_ON  = NOTE_SVG.replace('%SLASH%', '');
+const ICON_SOUND_OFF = NOTE_SVG.replace('%SLASH%',
+  '<line x1="2.5" y1="2.5" x2="21.5" y2="21.5" stroke-width="2.4"/>');
+
 function syncMuteBtn(){
   const b = $('muteBtn');
-  b.textContent = state.muted ? '✕' : '♪';
+  b.innerHTML = state.muted ? ICON_SOUND_OFF : ICON_SOUND_ON;
   b.classList.toggle('off', state.muted);
+  const label = state.muted ? 'Turn sound on' : 'Turn sound off';
+  b.title = label;
+  b.setAttribute('aria-label', label);
 }
 
 document.addEventListener('keydown', e => {

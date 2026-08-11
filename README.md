@@ -20,17 +20,17 @@ python3 -m http.server 8000
 - A correct answer plays a rising **ding** and advances immediately. The ding pitches up as a streak builds.
 - A wrong answer plays a **buzzer**, shakes the question, and lets the player try the same problem again — nothing is skipped.
 - Upbeat instrumental background music (no lyrics) plays while the clock runs.
-- `Esc` ends a round early. The `♪` button in the header mutes everything.
+- `Esc` ends a round early. The music-note button in the header mutes everything; it shows a slash through the note while sound is off.
 
 ## Difficulty levels
 
 The slider picks one of six levels. Two things change as the level rises: the **operation mix** shifts from addition/subtraction toward multiplication/division, and the **numbers get bigger**.
 
-Addition/subtraction and multiplication/division carry separate number ranges. That lets Level 1 work with sums up to 9 while multiplication still enters gently at Level 2 with small factors, instead of forcing both onto one shared range.
+Addition/subtraction and multiplication/division carry separate number ranges, rather than sharing one. That lets each level push adding and subtracting further than multiplying and dividing — Level 3 adds numbers up to 12 but only multiplies up to 7 — so times tables can enter gently while the easier operations keep growing.
 
 | Level | Name | +/− range | ×/÷ range | Add | Sub | Mult | Div |
 |---|---|---|---|---|---|---|---|
-| 1 | Warm-Up | 0–9 | — | 50% | 50% | — | — |
+| 1 | Warm-Up | 0–5 | — | 50% | 50% | — | — |
 | 2 | Getting Going | 0–10 | 0–5 | 40% | 32% | 18% | 10% |
 | 3 | Mixing It Up | 0–12 | 0–7 | 30% | 25% | 27% | 18% |
 | 4 | Fact Power | 2–12 | 1–9 | 20% | 20% | 36% | 24% |
@@ -43,7 +43,9 @@ Subtraction always produces a non-negative answer, and division always divides e
 
 Commutative pairs count as the same problem: if a player sees `3 + 7`, then neither `3 + 7` nor `7 + 3` will come back that round. Same for multiplication. Subtraction and division are already normalized by construction, so they need no special handling. The order shown is still randomized — you just never get both orders.
 
-The smallest pool is Level 1 at 110 distinct problems, still well past what a fast player reaches in 60 seconds. If a pool ever did run dry, the round starts a clean pass rather than stalling.
+**Level 1 is the one exception, by design.** Numbers 0–5 with commutative pairs collapsed yield only 42 distinct problems: 21 additions and 21 subtractions. A fluent student answering faster than roughly one problem every 1.5 seconds will use them all up inside 60 seconds — in simulation the wall arrives around question 41, occasionally as early as 35. At that point the round starts a clean second pass rather than stalling, so nothing repeats until everything has been seen once, and the problem still on screen is excluded so a question never appears twice in a row. Levels 2 through 6 have pools of 178 to 277 problems and run well past 90 questions with no repeat at all.
+
+Widening Level 1 or letting `3 + 2` and `2 + 3` both count would enlarge the pool, at the cost of the range or the no-repeat rule.
 
 To retune the curriculum, edit the `LEVELS` object near the top of the `<script>` block — the weights (`w`) and both number ranges (`as` for add/subtract, `md` for multiply/divide) are all in one place.
 

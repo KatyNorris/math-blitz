@@ -404,14 +404,18 @@
    md = [min,max] operand range for multiplication and division.
    The two ranges are separate so + and − can use big numbers
    early while × and ÷ still enter gently with small factors.
+   minSum  = smallest allowed sum, so every + has to cross ten.
+   subTeen = share of − drawn with a minuend in the teens. Those
+             are the borrowing facts, 15 − 8, and they are the only
+             way to make − hard once operands stop at 9.
    ============================================================ */
 const LEVELS = {
   1:{ name:'Warm-Up',      desc:'Adding and subtracting up to 5',           as:[0, 5],  md:[0, 5],  w:{add:50, sub:50, mul:0,  div:0}  },
-  2:{ name:'Getting Going',desc:'Sums to 10, plus the first times tables',  as:[0,10],  md:[0, 5],  w:{add:40, sub:32, mul:18, div:10} },
-  3:{ name:'Mixing It Up', desc:'All four operations with numbers to 12',   as:[0,12],  md:[0, 7],  w:{add:30, sub:25, mul:27, div:18} },
-  4:{ name:'Fact Power',   desc:'Bigger numbers, mostly multiplying',       as:[2,12],  md:[1, 9],  w:{add:20, sub:20, mul:36, div:24} },
-  5:{ name:'Speed Demon',  desc:'Times tables and division up to 11',       as:[3,12],  md:[2,11],  w:{add:14, sub:13, mul:43, div:30} },
-  6:{ name:'Blitz Master', desc:'The full 12 × 12 gauntlet',                as:[4,12],  md:[2,12],  w:{add:8,  sub:7,  mul:50, div:35} }
+  2:{ name:'Getting Going',desc:'Sums to 9, plus the first times tables',   as:[0, 9],  md:[0, 5],  w:{add:40, sub:32, mul:18, div:10} },
+  3:{ name:'Mixing It Up', desc:'All four operations with numbers to 9',    as:[0, 9],  md:[2, 7],  w:{add:30, sub:25, mul:27, div:18} },
+  4:{ name:'Fact Power',   desc:'Bigger numbers, mostly multiplying',       as:[2, 9],  md:[2, 9],  w:{add:20, sub:20, mul:36, div:24} },
+  5:{ name:'Speed Demon',  desc:'Times tables and division up to 9',        as:[3, 9],  md:[3, 9],  w:{add:14, sub:13, mul:43, div:30}, minDiff:3, minSum:10, subTeen:0.6 },
+  6:{ name:'Blitz Master', desc:'Only × and ÷, the hard half of the table', as:[4, 9],  md:[4, 9],  w:{add:0,  sub:0,  mul:59, div:41} }
 };
 const ROUND_SECONDS = 60;
 const STORE_KEY = 'mathBlitzHighScores.v1';
@@ -595,7 +599,22 @@ function pickOp(weights){
   return 'add';
 }
 
+// 10, 11 and 12 never appear as numbers in a question. They are fine as
+// answers: 7 + 5 = 12 stays, 12 × 3 = 36 does not. Numbers above 9 do show
+// up — teen minuends and division dividends — and a dividend is computed
+// rather than drawn, so 10 ÷ 2 and 12 ÷ 3 still need catching here.
+const NOT_IN_QUESTIONS = [10, 11, 12];
+function showsBannedNumber(q){
+  return NOT_IN_QUESTIONS.includes(q.a) || NOT_IN_QUESTIONS.includes(q.b);
+}
+
 function buildQuestion(level){
+  let q = drawQuestion(level);
+  for (let t = 0; t < 40 && showsBannedNumber(q); t++) q = drawQuestion(level);
+  return q;
+}
+
+function drawQuestion(level){
   const cfg = LEVELS[level];
   const op = pickOp(cfg.w);
   const [lo, hi] = (op === 'add' || op === 'sub') ? cfg.as : cfg.md;
@@ -603,10 +622,31 @@ function buildQuestion(level){
 
   if (op === 'add'){
     a = randInt(lo, hi); b = randInt(lo, hi);
+    if (cfg.minSum){
+      for (let t = 0; t < 40 && a + b < cfg.minSum; t++){
+        a = randInt(lo, hi); b = randInt(lo, hi);
+      }
+    }
     answer = a + b; symbol = '+';
   } else if (op === 'sub'){
-    const x = randInt(lo, hi), y = randInt(lo, hi);
-    a = Math.max(x, y); b = Math.min(x, y);
+    if (cfg.subTeen && Math.random() < cfg.subTeen){
+      // A minuend in the teens is what forces a borrow. Holding the
+      // answer under 10 is the same condition: 15 − 8 borrows, while
+      // 18 − 4 = 14 does not, and it is the borrow that makes it hard.
+      a = randInt(13, 18); b = randInt(lo, 9);
+      for (let t = 0; t < 40 && a - b > 9; t++){
+        a = randInt(13, 18); b = randInt(lo, 9);
+      }
+    } else {
+      // minDiff rules out differences too easy for the level: 9 − 9, 9 − 8.
+      let x = randInt(lo, hi), y = randInt(lo, hi);
+      if (cfg.minDiff){
+        for (let t = 0; t < 40 && Math.abs(x - y) < cfg.minDiff; t++){
+          x = randInt(lo, hi); y = randInt(lo, hi);
+        }
+      }
+      a = Math.max(x, y); b = Math.min(x, y);
+    }
     answer = a - b; symbol = '−';
   } else if (op === 'mul'){
     a = randInt(lo, hi); b = randInt(lo, hi);

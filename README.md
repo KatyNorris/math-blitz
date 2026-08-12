@@ -30,7 +30,7 @@ Addition/subtraction and multiplication/division carry separate number ranges, r
 
 | Level | Name | +/− range | ×/÷ range | Add | Sub | Mult | Div |
 |---|---|---|---|---|---|---|---|
-| 1 | Warm-Up | 0–5 | — | 50% | 50% | — | — |
+| 1 | Warm-Up | 0–7 | — | 50% | 50% | — | — |
 | 2 | Getting Going | 0–9 | 0–5 | 40% | 32% | 18% | 10% |
 | 3 | Mixing It Up | 0–9 | 2–7 | 30% | 25% | 27% | 18% |
 | 4 | Fact Power | 2–9 | 2–9 | 20% | 20% | 36% | 24% |
@@ -38,6 +38,8 @@ Addition/subtraction and multiplication/division carry separate number ranges, r
 | 6 | Blitz Master | — | 4–9 | — | — | 59% | 41% |
 
 **Level 6 drops adding and subtracting entirely.** It is pure times tables and division, drawn from factors of 4 through 9 — the corner of the table students find hardest. Level 5 is the last level where all four operations appear.
+
+**Level 1 keeps its easy shapes on purpose.** Zero is allowed as an operand and a number may be subtracted from itself, so `3 + 0`, `5 − 0` and `4 − 4` all appear. Those are gentle, but they are also real facts an early learner is still consolidating, and the entry level is where they belong.
 
 Subtraction always produces a non-negative answer, and division always divides evenly, so every answer is a whole number.
 
@@ -59,11 +61,13 @@ The remaining single-digit draws are governed by `minDiff`, which requires a dif
 
 Commutative pairs count as the same problem: if a player sees `3 + 7`, then neither `3 + 7` nor `7 + 3` will come back that round. Same for multiplication. Subtraction and division are already normalized by construction, so they need no special handling. The order shown is still randomized — you just never get both orders.
 
-**Level 1 is the one exception, by design.** Numbers 0–5 with commutative pairs collapsed yield only 42 distinct problems: 21 additions and 21 subtractions. A fluent student answering faster than roughly one problem every 1.5 seconds will use them all up inside 60 seconds — in simulation the wall arrives around question 41, occasionally as early as 35. At that point the round starts a clean second pass rather than stalling, so nothing repeats until everything has been seen once, and the problem still on screen is excluded so a question never appears twice in a row.
+**When a pool does run out**, the round starts a clean second pass rather than stalling, so nothing repeats until everything has been seen once, and the problem still on screen is excluded so a question never appears twice in a row.
 
-**Level 6 is the other tight one**, at 57 distinct problems — factors of 4–9 give 21 multiplications and 36 divisions, and with adding and subtracting removed there is nothing else to draw on. That is only a risk for a very fast player: in simulation a 50-question round (1.2 seconds each) ran the pool dry in 0.4% of rounds, a 55-question round in 20% of them, and a 60-question round always. It resets the same way Level 1 does. The remaining pools are comfortable: Level 5 has 128 distinct problems and Levels 2 through 4 range from 152 to 166.
+**Level 6 has the smallest pool**, at 57 distinct problems — factors of 4–9 give 21 multiplications and 36 divisions, and with adding and subtracting removed there is nothing else to draw on. That is only a risk for a very fast player: in simulation a 50-question round (1.2 seconds each) ran the pool dry in 0.4% of rounds, a 55-question round in 20% of them, and a 60-question round always.
 
-Widening Level 1 or letting `3 + 2` and `2 + 3` both count would enlarge the pool, at the cost of the range or the no-repeat rule.
+**Level 1 used to be the tight one.** At operands 0–5 it held just 42 problems, and a fluent student answering faster than one every 1.5 seconds used them all up inside 60 seconds, hitting the wall around question 41. Widening it to 0–7 raised the pool to 72 — 36 additions and 36 subtractions — comfortably more than anyone answers in a minute. The other pools are comfortable: Level 5 has 128 distinct problems and Levels 2 through 4 range from 152 to 166.
+
+Letting `3 + 2` and `2 + 3` both count would enlarge every pool, at the cost of the no-repeat rule.
 
 To retune the curriculum, edit the `LEVELS` object near the top of the `<script>` block — the weights (`w`) and both number ranges (`as` for add/subtract, `md` for multiply/divide) are all in one place.
 

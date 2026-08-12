@@ -410,7 +410,7 @@
              way to make − hard once operands stop at 9.
    ============================================================ */
 const LEVELS = {
-  1:{ name:'Warm-Up',      desc:'Adding and subtracting numbers up to 5',             as:[0, 5],  md:[0, 5],  w:{add:50, sub:50, mul:0,  div:0}  },
+  1:{ name:'Warm-Up',      desc:'Adding and subtracting numbers up to 7',             as:[0, 7],  md:[0, 5],  w:{add:50, sub:50, mul:0,  div:0}  },
   2:{ name:'Getting Going',desc:'Adding and subtracting to 9, first times tables',    as:[0, 9],  md:[0, 5],  w:{add:40, sub:32, mul:18, div:10} },
   3:{ name:'Mixing It Up', desc:'All four operations with times tables up to 7',      as:[0, 9],  md:[2, 7],  w:{add:30, sub:25, mul:27, div:18} },
   4:{ name:'Fact Power',   desc:'All four operations with times tables to 9',         as:[2, 9],  md:[2, 9],  w:{add:20, sub:20, mul:36, div:24} },
@@ -668,8 +668,8 @@ function drawQuestion(level){
   return { a, b, answer, symbol, key };
 }
 
-// `seen` holds every question already shown this sprint. Level 1 has only
-// 42 distinct problems, so a fast player can genuinely use them all up.
+// `seen` holds every question already shown this sprint. Level 6 has only
+// 57 distinct problems, so a fast player can genuinely use them all up.
 function nextQuestion(level, seen, lastKey){
   let q;
   for (let i = 0; i < 60; i++){

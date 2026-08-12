@@ -410,12 +410,12 @@
              way to make − hard once operands stop at 9.
    ============================================================ */
 const LEVELS = {
-  1:{ name:'Warm-Up',      desc:'Adding and subtracting up to 5',           as:[0, 5],  md:[0, 5],  w:{add:50, sub:50, mul:0,  div:0}  },
-  2:{ name:'Getting Going',desc:'Sums to 9, plus the first times tables',   as:[0, 9],  md:[0, 5],  w:{add:40, sub:32, mul:18, div:10} },
-  3:{ name:'Mixing It Up', desc:'All four operations with numbers to 9',    as:[0, 9],  md:[2, 7],  w:{add:30, sub:25, mul:27, div:18} },
-  4:{ name:'Fact Power',   desc:'Bigger numbers, mostly multiplying',       as:[2, 9],  md:[2, 9],  w:{add:20, sub:20, mul:36, div:24} },
-  5:{ name:'Speed Demon',  desc:'Times tables and division up to 9',        as:[3, 9],  md:[3, 9],  w:{add:14, sub:13, mul:43, div:30}, minDiff:3, minSum:10, subTeen:0.6 },
-  6:{ name:'Blitz Master', desc:'Only × and ÷, the hard half of the table', as:[4, 9],  md:[4, 9],  w:{add:0,  sub:0,  mul:59, div:41} }
+  1:{ name:'Warm-Up',      desc:'Adding and subtracting numbers up to 5',             as:[0, 5],  md:[0, 5],  w:{add:50, sub:50, mul:0,  div:0}  },
+  2:{ name:'Getting Going',desc:'Adding and subtracting to 9, first times tables',    as:[0, 9],  md:[0, 5],  w:{add:40, sub:32, mul:18, div:10} },
+  3:{ name:'Mixing It Up', desc:'All four operations with times tables up to 7',      as:[0, 9],  md:[2, 7],  w:{add:30, sub:25, mul:27, div:18} },
+  4:{ name:'Fact Power',   desc:'All four operations with times tables to 9',         as:[2, 9],  md:[2, 9],  w:{add:20, sub:20, mul:36, div:24} },
+  5:{ name:'Speed Demon',  desc:'Harder addition and subtraction, factors 3 - 9',     as:[3, 9],  md:[3, 9],  w:{add:14, sub:13, mul:43, div:30}, minDiff:3, minSum:10, subTeen:0.6 },
+  6:{ name:'Blitz Master', desc:'All division and multiplication for factors 4 to 9', as:[4, 9],  md:[4, 9],  w:{add:0,  sub:0,  mul:59, div:41} }
 };
 const ROUND_SECONDS = 60;
 const STORE_KEY = 'mathBlitzHighScores.v1';

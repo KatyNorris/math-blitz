@@ -447,6 +447,10 @@ const Audio2 = (() => {
     if (ctx) return;
     const AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return;
+    // iOS gives Web Audio an "ambient" session, which the hardware Ring/Silent
+    // switch mutes however loud the volume is. Asking for "playback" opts out.
+    // Has to happen inside a user gesture, which is where init() is reached.
+    if (navigator.audioSession) navigator.audioSession.type = 'playback';
     ctx = new AC();
     master   = ctx.createGain(); master.gain.value = 1;   master.connect(ctx.destination);
     musicBus = ctx.createGain(); musicBus.gain.value = 0; musicBus.connect(master);
@@ -458,7 +462,9 @@ const Audio2 = (() => {
     for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
   }
 
-  function resume(){ init(); if (ctx && ctx.state === 'suspended') ctx.resume(); }
+  // Safari also parks the context in a non-standard 'interrupted' state after a
+  // phone call or another app takes the audio, so revive anything not running.
+  function resume(){ init(); if (ctx && ctx.state !== 'running') ctx.resume(); }
   function setMuted(m){ init(); if (master) master.gain.setTargetAtTime(m ? 0 : 1, ctx.currentTime, 0.02); }
 
   function tone(t, freq, dur, type, peak, dest, detune){
